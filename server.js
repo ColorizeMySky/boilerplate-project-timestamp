@@ -24,6 +24,29 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
+app.get(/\/api\/timestamp\/([\w\.-]*)$/, function(req, res){
+  let isoDataNum = /\/api\/timestamp\/\d*$/; 
+  let isoDataHyphen = /\d{1,4}-(0?[1-9]|1[012])-(0?[1-9]|[12]\d|3[01])/;  
+  
+  let urlParsed = url.parse(req.url, true);
+  
+  if(isoDataNum.test(urlParsed.pathname)) {
+    let unix = urlParsed.pathname.replace(/\/api\/timestamp\/(\d*)$/, '$1');
+    let date = new Date();
+    date.setTime(unix);
+    res.json({unix: parseInt(unix), utc: date.toUTCString()});    
+  }
+  else if(isoDataHyphen.test(urlParsed.pathname)) {
+    let utc = urlParsed.pathname.replace(/\/api\/timestamp\/(\d{1,4}-(0?[1-9]|1[012])-(0?[1-9]|[12]\d|3[01]))/, '$1');
+    let date = new Date(utc)
+    //res.json({test: 'This daemon obey to me'});
+    res.json({unix: date.getTime(), utc: date.toUTCString()});
+  }
+  else {
+    res.end({"error":"Invalid Date"});
+  }  
+});
+
 
 
 // listen for requests :)
